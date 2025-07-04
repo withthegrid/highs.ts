@@ -41,16 +41,16 @@ jobs:
             --CDCMAKE_CXX_COMPILER_LAUNCHER=ccache
       - name: Test
         run: pnpm t
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: out/coverage
-      - name: Bump version and create tag
-        id: bump-version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Upload coverage
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     directory: out/coverage
+      # - name: Bump version and create tag
+      #   id: bump-version
+      #   uses: mathieudutour/github-tag-action@v6.2
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
   prebuild-native:
     strategy:
       matrix:
