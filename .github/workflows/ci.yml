@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - release
     paths-ignore:
       - '**.md'
 env:
@@ -162,41 +163,3 @@ jobs:
           name: docker-${{ matrix.key }}-prebuilds
           path: packages/highs-addon/prebuilds
           retention-days: 1
-  publish:
-    name: Publish packages
-    timeout-minutes: 5
-    needs:
-      - test
-      - prebuild-native
-      - prebuild-docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
-      - name: Install
-        run: pnpm i --ignore-scripts
-      - name: Create prebuild directories
-        run: mkdir -p out/prebuilds packages/highs-addon/prebuilds
-      - name: Download prebuilds
-        uses: actions/download-artifact@v4
-        with:
-          path: out/prebuilds
-      - name: Flatten prebuilds
-        run: |
-          mv out/prebuilds/*/* packages/highs-addon/prebuilds
-          ls packages/highs-addon/prebuilds
-      - name: Publish
-        run: |
-          pnpm -r exec pnpm version ${{ needs.test.outputs.new-version }}
-          pnpm -r exec pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
