@@ -11,6 +11,25 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@mtth/stl-errors':
+        specifier: ^0.7.0
+        version: 0.7.0
+      '@mtth/stl-telemetry':
+        specifier: ^0.7.0
+        version: 0.7.0(@opentelemetry/api@1.9.0)
+      '@mtth/stl-utils':
+        specifier: ^0.7.0
+        version: 0.7.0
+      highs-addon:
+        specifier: ./packages/highs-addon
+        version: link:packages/highs-addon
+      tail:
+        specifier: ^2.2.6
+        version: 2.2.6
+      tmp-promise:
+        specifier: ^3.0.3
+        version: 3.0.3
     devDependencies:
       '@mtth/eslint-plugin':
         specifier: ^0.7.0
@@ -54,6 +73,10 @@ importers:
       pkg-prebuilds:
         specifier: ^1.0.0
         version: 1.0.0
+    devDependencies:
+      tmp-promise:
+        specifier: ^3.0.3
+        version: 3.0.3
     optionalDependencies:
       cmake-js:
         specifier: ^7.3.0
@@ -61,10 +84,6 @@ importers:
       node-addon-api:
         specifier: ^8.3.0
         version: 8.3.1
-    devDependencies:
-      tmp-promise:
-        specifier: ^3.0.3
-        version: 3.0.3
 
   packages/highs-solver:
     dependencies:

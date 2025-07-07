@@ -1,6 +1,6 @@
 {
-  "name": "highs-packages",
-  "version": "0.0.0",
+  "name": "highs-solver",
+  "version": "0.10.0",
   "private": true,
   "repository": "github:opvious/highs.ts",
   "author": "Opvious Engineering <oss@opvious.io>",
@@ -11,6 +11,18 @@
     "fix": "prettier --write 'packages/*/*.ts' 'packages/*/{src,test}/**/*.ts' && pnpm run lint --fix",
     "lint": "eslint 'packages/*/*.ts' 'packages/*/{src,test}/**/*.ts'",
     "test": "pnpm -r run test run --coverage && rm -rf out/coverage && mkdir -p out/coverage && for p in packages/*; do if [ -d \"$p/out/coverage\" ]; then cp -r \"$p/out/coverage\" out/coverage/\"${p#*/}\"; fi; done"
+  },
+  "exports": {
+    ".": "./packages/highs-solver/lib/index.js",
+    "./errors": "./packages/highs-solver/lib/index.errors.js"
+  },
+  "dependencies": {
+    "@mtth/stl-errors": "^0.7.0",
+    "@mtth/stl-telemetry": "^0.7.0",
+    "@mtth/stl-utils": "^0.7.0",
+    "highs-addon": "./packages/highs-addon",
+    "tail": "^2.2.6",
+    "tmp-promise": "^3.0.3"
   },
   "devDependencies": {
     "@mtth/eslint-plugin": "^0.7.0",
