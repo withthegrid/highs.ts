@@ -24,6 +24,9 @@ importers:
       highs-addon:
         specifier: ./packages/highs-addon
         version: link:packages/highs-addon
+      pkg-prebuilds:
+        specifier: ^1.0.0
+        version: 1.0.0
       tail:
         specifier: ^2.2.6
         version: 2.2.6

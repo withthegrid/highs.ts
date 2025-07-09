@@ -21,6 +21,7 @@
     "@mtth/stl-telemetry": "^0.7.0",
     "@mtth/stl-utils": "^0.7.0",
     "highs-addon": "./packages/highs-addon",
+    "pkg-prebuilds": "^1.0.0",
     "tail": "^2.2.6",
     "tmp-promise": "^3.0.3"
   },
