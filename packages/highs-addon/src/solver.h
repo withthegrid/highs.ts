@@ -15,7 +15,9 @@ class Solver : public Napi::ObjectWrap<Solver> {
   void PassModel(const Napi::CallbackInfo& info);
   void ReadModel(const Napi::CallbackInfo& info);
   void WriteModel(const Napi::CallbackInfo& info);
-
+  
+  void GetIis(const Napi::CallbackInfo& info);
+  
   void ChangeObjectiveSense(const Napi::CallbackInfo& info);
   void ChangeObjectiveOffset(const Napi::CallbackInfo& info);
   void ChangeColsCost(const Napi::CallbackInfo& info);

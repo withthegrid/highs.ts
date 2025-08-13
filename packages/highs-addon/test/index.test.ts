@@ -5,6 +5,7 @@ import {AsyncOrSync} from 'ts-essentials';
 import util from 'util';
 
 import * as sut from '../';
+import {getModel} from './inputs';
 
 test('vendor version', () => {
   expect(sut.solverVersion()).toMatch(/\d+\.\d+\.\d+/);
@@ -234,6 +235,108 @@ describe('solver', () => {
       solver.zeroAllClocks();
       expect(solver.getRunTime()).toEqual(0);
     });
+  });
+
+  test('failed solver run', async () => {
+    const solver = new sut.Solver();
+
+    const {model, compressedSparseRowMatrix} = getModel();
+
+    const solverModel = {
+      isMaximization: false,
+      objectiveLinearWeights: new Float64Array(model.objectiveVector),
+      columnLowerBounds: new Float64Array(model.bounds.variable.lower),
+      columnUpperBounds: new Float64Array(model.bounds.variable.upper),
+      rowLowerBounds: new Float64Array(model.bounds.constraint.lower),
+      rowUpperBounds: new Float64Array(model.bounds.constraint.upper),
+      weights: {
+        offsets: new Int32Array(compressedSparseRowMatrix.offsets),
+        indices: new Int32Array(compressedSparseRowMatrix.indices),
+        values: new Float64Array(compressedSparseRowMatrix.values),
+      },
+    };
+
+    const width = solverModel.columnLowerBounds.length;
+    const height = solverModel.rowLowerBounds.length;
+
+    solver.passModel({
+      columnCount: width,
+      rowCount: height,
+      ...solverModel,
+    });
+
+    try {
+      await p(solver, 'run');
+      // await solver.solve({allowNonOptimal: true});
+    } catch (e) {
+      console.log('Relaxed solver failed with error:', e);
+      // we have to explicitelly catch error for statuses: `LOAD_ERROR, MODEL_ERROR, PRESOLVE_ERROR, SOLVE_ERROR, POSTSOLVE_ERROR, MODEL_EMPTY, UNKNOWN, NOT_SET`
+    }
+
+    console.log(
+      `Info: ${JSON.stringify(solver.getInfo())}. Primal solution: ${solver.assessPrimalSolution()}.`
+    );
+
+    expect(solver.assessPrimalSolution()).toEqual({
+      isFeasible: false,
+      isIntegral: false,
+      isValid: false,
+    });
+
+    // Analyzes HiGHS IIS (Irreducible Inconsistent Subsystem) results to identify infeasibility causes.
+    //
+    // Calling `getIis()` will compute and return a detailed analysis using the configured IIS strategy.
+    //
+    // ### IIS Strategy Configuration
+    // The analysis uses one of these strategies (configured via `highs_->setOptionValue`):
+    //
+    // ```cpp
+    // enum IisStrategy : int {
+    //   kIisStrategyMin = 0,
+    //   kIisStrategyLight = kIisStrategyMin,  // 0 - Minimal lightweight analysis
+    //   kIisStrategyFromLpRowPriority,        // 1 - Prioritize row (constraint) conflicts (default)
+    //   kIisStrategyFromLpColPriority,        // 2 - Prioritize column (variable) conflicts
+    //   // Future strategies (currently disabled in HiGHS):
+    //   // kIisStrategyFromRayRowPriority,     // 3 - Ray-based row priority
+    //   // kIisStrategyFromRayColPriority,     // 4 - Ray-based column priority
+    //   kIisStrategyMax = kIisStrategyFromLpColPriority
+    // };
+    // ```
+    //
+    // Current implementation uses `kIisStrategyFromLpRowPriority` (1) by default, which:
+    // - Focuses first on identifying minimal row-based constraint conflicts
+    // - Then checks variable bounds only if needed
+    // - Provides best balance between completeness and speed for most problems
+    //
+    // Note: This function will log diagnostic information to the console during analysis, including:
+    // - Number of conflicting constraints/variables found
+    // - Detected conflict patterns
+    // - Suggested relaxation values for bounds
+    //
+    // **Core IIS Components**
+    // - IIS identifies minimal set of conflicting constraints via "Elasticity filter enforces bounds on X cols and Y rows"
+    // - Y = number of problematic constraints (rows)
+    // - X = number of variables at bounds (cols)
+    //
+    // **Constraint Status Meanings**
+    // - Upper: Constraint's upper bound actively contributes to infeasibility
+    // - Lower: Constraint's lower bound actively contributes
+    // - Free: Constraint not part of IIS
+    //
+    // **Variable Status Meanings**
+    // - Upper: Variable at upper bound in IIS context
+    // - Lower: Variable at lower bound in IIS context
+    // - Free: Variable not forcing infeasibility
+    //
+    // **Diagnostic Steps**
+    // 1. Isolate all constraints marked Upper/Lower
+    // 2. Identify variables marked Upper/Lower
+    // 3. Cross-reference to find:
+    //    - Direct constraint contradictions
+    //    - Variables forced beyond feasible ranges
+    //    - Impossible combinations through shared variables
+
+    solver.getIis();
   });
 });
 

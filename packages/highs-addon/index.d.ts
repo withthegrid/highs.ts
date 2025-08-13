@@ -12,6 +12,8 @@ export declare class Solver {
   readModel(fp: string, cb: (err: Error) => void): string;
   writeModel(fp: string, cb: (err: Error) => void): string;
 
+  getIis(): void;
+
   changeObjectiveSense(isMaximization: boolean): void;
   changeObjectiveOffset(offset: number): void;
   changeColsCost(arr: Float64Array): void;

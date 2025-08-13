@@ -10,6 +10,8 @@ void Solver::Init(Napi::Env env, Napi::Object exports) {
                    InstanceMethod("passModel", &Solver::PassModel),
                    InstanceMethod("readModel", &Solver::ReadModel),
                    InstanceMethod("writeModel", &Solver::WriteModel),
+                   
+                   InstanceMethod("getIis", &Solver::GetIis),
 
                    InstanceMethod("changeObjectiveSense", &Solver::ChangeObjectiveSense),
                    InstanceMethod("changeObjectiveOffset", &Solver::ChangeObjectiveOffset),
@@ -284,6 +286,67 @@ void Solver::WriteModel(const Napi::CallbackInfo& info) {
   Napi::Function cb = info[1].As<Napi::Function>();
   WriteModelWorker* worker = new WriteModelWorker(cb, this->highs_, path);
   worker->Queue();
+}
+
+// IIS (Irreducible Inconsistent Subsystem)
+
+void Solver::GetIis(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  HighsIis iis;
+
+  this->highs_->setOptionValue("iis_strategy", (HighsInt)kIisStrategyFromLpRowPriority);
+
+  HighsStatus status = this->highs_->getIis(iis);
+
+  std::cerr << "getIis status: " << static_cast<int>(status) << std::endl;
+
+  if (status != HighsStatus::kOk) {
+    ThrowError(env, "getIis failed");
+    return;
+  }
+
+  // Log whether IIS is valid
+  std::cerr << "IIS valid: " << (iis.valid_ ? "true" : "false") << std::endl;
+  std::cerr << "IIS strategy: " << iis.strategy_ << std::endl;
+
+  // Bound enums (highs.ts/node_modules/.pnpm/node_modules/highs-addon/build/highs_download-prefix/src/highs_download/highs/lp_data/HighsIis.h)
+  // enum IisBoundStatus {
+  //   kIisBoundStatusDropped = -1,
+  //   kIisBoundStatusNull,   // 0
+  //   kIisBoundStatusFree,   // 1
+  //   kIisBoundStatusLower,  // 2
+  //   kIisBoundStatusUpper,  // 3
+  //   kIisBoundStatusBoxed   // 4
+  // };
+
+  // Status enums (highs.ts/node_modules/.pnpm/node_modules/highs-addon/build/highs_download-prefix/src/highs_download/highs/lp_data/HConst.h)
+  // enum IisStatus {
+  //   kIisStatusMin = 0,
+  //   kIisStatusInConflict = kIisStatusMin,  // 0
+  //   kIisStatusNotInConflict,               // 1
+  //   kIisStatusMaybeInConflict,             // 2
+  //   kIisStatusMax = kIisStatusMaybeInConflict
+  // };
+
+  for (size_t i = 0; i < iis.col_index_.size(); ++i) {
+    std::cerr << "Col " << iis.col_index_[i]
+              << ", bound = " << iis.iisBoundStatusToString(iis.col_bound_[i])
+              << ", status = " << iis.col_status_[i] << std::endl;
+  }
+
+  for (size_t i = 0; i < iis.row_index_.size(); ++i) {
+    std::cerr << "Row " << iis.row_index_[i]
+              << ", bound = " << iis.iisBoundStatusToString(iis.row_bound_[i])
+              << ", status = " << iis.row_status_[i] << std::endl;
+  }
+
+  for (size_t i = 0; i < iis.info_.size(); ++i) {
+    std::cerr << "Subproblem " << i
+              << " | simplex_time = " << iis.info_[i].simplex_time
+              << " | simplex_iterations = " << iis.info_[i].simplex_iterations
+              << std::endl;
+  }
 }
 
 // Updates
