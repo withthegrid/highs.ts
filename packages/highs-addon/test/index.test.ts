@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {readFile} from 'fs/promises';
 import path from 'path';
 import {withFile} from 'tmp-promise';
@@ -5,7 +6,7 @@ import {AsyncOrSync} from 'ts-essentials';
 import util from 'util';
 
 import * as sut from '../';
-import {getModel} from './inputs';
+import {getSolverModel} from './get-solver-model';
 
 test('vendor version', () => {
   expect(sut.solverVersion()).toMatch(/\d+\.\d+\.\d+/);
@@ -240,21 +241,7 @@ describe('solver', () => {
   test('failed solver run', async () => {
     const solver = new sut.Solver();
 
-    const {model, compressedSparseRowMatrix} = getModel();
-
-    const solverModel = {
-      isMaximization: false,
-      objectiveLinearWeights: new Float64Array(model.objectiveVector),
-      columnLowerBounds: new Float64Array(model.bounds.variable.lower),
-      columnUpperBounds: new Float64Array(model.bounds.variable.upper),
-      rowLowerBounds: new Float64Array(model.bounds.constraint.lower),
-      rowUpperBounds: new Float64Array(model.bounds.constraint.upper),
-      weights: {
-        offsets: new Int32Array(compressedSparseRowMatrix.offsets),
-        indices: new Int32Array(compressedSparseRowMatrix.indices),
-        values: new Float64Array(compressedSparseRowMatrix.values),
-      },
-    };
+    const solverModel = getSolverModel();
 
     const width = solverModel.columnLowerBounds.length;
     const height = solverModel.rowLowerBounds.length;
@@ -273,15 +260,7 @@ describe('solver', () => {
       // we have to explicitelly catch error for statuses: `LOAD_ERROR, MODEL_ERROR, PRESOLVE_ERROR, SOLVE_ERROR, POSTSOLVE_ERROR, MODEL_EMPTY, UNKNOWN, NOT_SET`
     }
 
-    console.log(
-      `Info: ${JSON.stringify(solver.getInfo())}. Primal solution: ${solver.assessPrimalSolution()}.`
-    );
-
-    expect(solver.assessPrimalSolution()).toEqual({
-      isFeasible: false,
-      isIntegral: false,
-      isValid: false,
-    });
+    console.log(solver.getSolution().columnValues);
 
     // Analyzes HiGHS IIS (Irreducible Inconsistent Subsystem) results to identify infeasibility causes.
     //

@@ -1,4 +1,3 @@
-#include "solver.h"
 
 void Solver::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func =
@@ -10,7 +9,7 @@ void Solver::Init(Napi::Env env, Napi::Object exports) {
                    InstanceMethod("passModel", &Solver::PassModel),
                    InstanceMethod("readModel", &Solver::ReadModel),
                    InstanceMethod("writeModel", &Solver::WriteModel),
-                   
+
                    InstanceMethod("getIis", &Solver::GetIis),
 
                    InstanceMethod("changeObjectiveSense", &Solver::ChangeObjectiveSense),
@@ -22,7 +21,7 @@ void Solver::Init(Napi::Env env, Napi::Object exports) {
                    InstanceMethod("getModelStatus", &Solver::GetModelStatus),
                    InstanceMethod("getInfo", &Solver::GetInfo),
                    InstanceMethod("getRunTime", &Solver::GetRunTime),
-                   
+
                    InstanceMethod("getSolution", &Solver::GetSolution),
                    InstanceMethod("setSolution", &Solver::SetSolution),
                    InstanceMethod("writeSolution", &Solver::WriteSolution),

@@ -11,6 +11,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      pnpm:
+        specifier: ^10.19.0
+        version: 10.19.0
     devDependencies:
       '@mtth/eslint-plugin':
         specifier: ^0.8.2
@@ -1455,6 +1459,11 @@ packages:
   pkg-prebuilds@1.0.0:
     resolution: {integrity: sha512-D9wlkXZCmjxj2kBHTw3fGSyjoahr33breGBoJcoezpi7ouYS59DJVOHMZ+dgqacSrZiJo4qtkXxLQTE+BqXJmQ==}
     engines: {node: '>= 14.15.0'}
+    hasBin: true
+
+  pnpm@10.19.0:
+    resolution: {integrity: sha512-yfxyNukq31yK9C/VvxYS35nCzrYvJwRwMvRyCzP46s3eMRhl6RxBHyd09hjYLzIICOy1Fxi/qCwGDEunx2oyuA==}
+    engines: {node: '>=18.12'}
     hasBin: true
 
   postcss@8.5.6:
@@ -3233,6 +3242,8 @@ snapshots:
   pkg-prebuilds@1.0.0:
     dependencies:
       yargs: 17.7.2
+
+  pnpm@10.19.0: {}
 
   postcss@8.5.6:
     dependencies:
