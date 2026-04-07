@@ -1,3 +1,4 @@
+#include "solver.h"
 
 void Solver::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func =
