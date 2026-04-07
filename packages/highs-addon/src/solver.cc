@@ -288,8 +288,6 @@ void Solver::WriteModel(const Napi::CallbackInfo& info) {
   worker->Queue();
 }
 
-// IIS (Irreducible Inconsistent Subsystem)
-
 void Solver::GetIis(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -309,25 +307,6 @@ void Solver::GetIis(const Napi::CallbackInfo& info) {
   // Log whether IIS is valid
   std::cerr << "IIS valid: " << (iis.valid_ ? "true" : "false") << std::endl;
   std::cerr << "IIS strategy: " << iis.strategy_ << std::endl;
-
-  // Bound enums (highs.ts/node_modules/.pnpm/node_modules/highs-addon/build/highs_download-prefix/src/highs_download/highs/lp_data/HighsIis.h)
-  // enum IisBoundStatus {
-  //   kIisBoundStatusDropped = -1,
-  //   kIisBoundStatusNull,   // 0
-  //   kIisBoundStatusFree,   // 1
-  //   kIisBoundStatusLower,  // 2
-  //   kIisBoundStatusUpper,  // 3
-  //   kIisBoundStatusBoxed   // 4
-  // };
-
-  // Status enums (highs.ts/node_modules/.pnpm/node_modules/highs-addon/build/highs_download-prefix/src/highs_download/highs/lp_data/HConst.h)
-  // enum IisStatus {
-  //   kIisStatusMin = 0,
-  //   kIisStatusInConflict = kIisStatusMin,  // 0
-  //   kIisStatusNotInConflict,               // 1
-  //   kIisStatusMaybeInConflict,             // 2
-  //   kIisStatusMax = kIisStatusMaybeInConflict
-  // };
 
   for (size_t i = 0; i < iis.col_index_.size(); ++i) {
     std::cerr << "Col " << iis.col_index_[i]

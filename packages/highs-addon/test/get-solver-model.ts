@@ -1,5 +1,4 @@
 import {getInput} from './get-input.js';
-import {SolverModel} from './solver.js';
 
 interface CompressedSparseRowMatrix {
   offsets: number[];
@@ -51,7 +50,7 @@ function denseToCompressedSparseRow(
   };
 }
 
-export function getSolverModel(): SolverModel {
+export function getSolverModel() {
   const input = getInput();
   const variableLowerBounds: number[] = [];
   const variableUpperBounds: number[] = [];
@@ -94,10 +93,6 @@ export function getSolverModel(): SolverModel {
       })
     );
   });
-
-  console.log(
-    input.variables.map((variable) => `${variable.prefix}.${variable.type}`)
-  );
 
   const compressedSparseRowMatrix =
     denseToCompressedSparseRow(constraintMatrix);
