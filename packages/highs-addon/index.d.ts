@@ -121,6 +121,12 @@ export interface Model {
    * is 1/2 of their value in this matrix.
    */
   readonly objectiveHessian?: Matrix;
+
+  /** Optional variable names for logging and export */
+  readonly columnNames?: string[];
+
+  /** Optional constraint names for logging and export */
+  readonly rowNames?: string[];
 }
 
 export interface Matrix {

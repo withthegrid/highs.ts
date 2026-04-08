@@ -54,9 +54,15 @@ export function getSolverModel() {
   const input = getInput();
   const variableLowerBounds: number[] = [];
   const variableUpperBounds: number[] = [];
+
+  const columnNames: string[] = [];
+  const rowNames: string[] = [];
+
   input.variables.forEach((variable) => {
     variableLowerBounds.push(variable.lowerBound ?? Number.NEGATIVE_INFINITY);
     variableUpperBounds.push(variable.upperBound ?? Number.POSITIVE_INFINITY);
+
+    columnNames.push(`${variable.prefix}.${variable.type}`);
   });
 
   const objectiveVector = input.variables.map((v) => {
@@ -73,6 +79,7 @@ export function getSolverModel() {
   const constraintMatrix: number[][] = [];
   const constraintLowerBounds: number[] = [];
   const constraintUpperBounds: number[] = [];
+
   input.constraints.forEach((constraint) => {
     constraintLowerBounds.push(
       constraint.lowerBound ?? Number.NEGATIVE_INFINITY
@@ -80,6 +87,8 @@ export function getSolverModel() {
     constraintUpperBounds.push(
       constraint.upperBound ?? Number.POSITIVE_INFINITY
     );
+    rowNames.push(constraint.identifier.replace(/\s+/g, '_'));
+
     constraintMatrix.push(
       input.variables.map((v) => {
         let factorSum = 0;
@@ -109,5 +118,7 @@ export function getSolverModel() {
       indices: new Int32Array(compressedSparseRowMatrix.indices),
       values: new Float64Array(compressedSparseRowMatrix.values),
     },
+    columnNames,
+    rowNames,
   };
 }

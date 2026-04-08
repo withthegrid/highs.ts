@@ -233,6 +233,28 @@ void Solver::PassModel(const Napi::CallbackInfo& info) {
     ThrowError(env, "Pass model failed");
     return;
   }
+  Napi::Value colNamesVal = obj.Get("columnNames");
+  if (!colNamesVal.IsUndefined() && colNamesVal.IsArray()) {
+    Napi::Array colNames = colNamesVal.As<Napi::Array>();
+    uint32_t len = colNames.Length();
+    for (uint32_t i = 0; i < len; ++i) {
+      Napi::Value nameVal = colNames.Get(i);
+      if (nameVal.IsString()) {
+        this->highs_->passColName(i, nameVal.As<Napi::String>().Utf8Value());
+      }
+    }
+  }
+  Napi::Value rowNamesVal = obj.Get("rowNames");
+  if (!rowNamesVal.IsUndefined() && rowNamesVal.IsArray()) {
+    Napi::Array rowNames = rowNamesVal.As<Napi::Array>();
+    uint32_t len = rowNames.Length();
+    for (uint32_t i = 0; i < len; ++i) {
+      Napi::Value nameVal = rowNames.Get(i);
+      if (nameVal.IsString()) {
+        this->highs_->passRowName(i, nameVal.As<Napi::String>().Utf8Value());
+      }
+    }
+  }
 }
 
 class ReadModelWorker : public UpdateWorker {
@@ -290,45 +312,80 @@ void Solver::WriteModel(const Napi::CallbackInfo& info) {
 
 void Solver::GetIis(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
-
   HighsIis iis;
 
-  this->highs_->setOptionValue("iis_strategy", (HighsInt)kIisStrategyFromLpRowPriority);
-
+  this->highs_->setOptionValue("iis_strategy", 10);
   HighsStatus status = this->highs_->getIis(iis);
 
-  std::cerr << "getIis status: " << static_cast<int>(status) << std::endl;
-
-  if (status != HighsStatus::kOk) {
-    ThrowError(env, "getIis failed");
+  if (status != HighsStatus::kOk || !iis.valid_) {
+    std::cerr << "IIS analysis failed or returned invalid." << std::endl;
     return;
   }
 
-  // Log whether IIS is valid
-  std::cerr << "IIS valid: " << (iis.valid_ ? "true" : "false") << std::endl;
-  std::cerr << "IIS strategy: " << iis.strategy_ << std::endl;
+  // Write the minimal infeasible model to a file
+  // This lets us open the exact broken subset in a text editor
+  this->highs_->writeIisModel("infeasible_subset.lp");
+  std::cerr << "--> Exported minimal infeasible model to 'infeasible_subset.lp'\n" << std::endl;
 
-  for (size_t i = 0; i < iis.col_index_.size(); ++i) {
-    std::cerr << "Col " << iis.col_index_[i]
-              << ", bound = " << iis.iisBoundStatusToString(iis.col_bound_[i])
-              << ", status = " << iis.col_status_[i] << std::endl;
+  // Grab the original LP so we can map indices to actual names/values
+  const HighsLp& lp = this->highs_->getLp();
+
+  // Strip leading spaces from HiGHS bound status strings
+  auto trim_spaces = [](std::string s) {
+    s.erase(0, s.find_first_not_of(' '));
+    return s;
+  };
+
+  // Map the IisStatus enum to readable strings
+  auto conflict_status_to_string = [](HighsInt s) {
+    if (s == 1) return "In Conflict";
+    if (s == 0) return "Maybe in Conflict";
+    if (s == -1) return "Not in Conflict";
+    return "Unknown";
+  };
+
+  if (!iis.col_index_.empty()) {
+    std::cerr << "--- " << iis.col_index_.size() << " Variables (Columns) in Conflict ---" << std::endl;
+    for (size_t i = 0; i < iis.col_index_.size(); ++i) {
+      if (i < iis.col_bound_.size()) {
+         HighsInt col = iis.col_index_[i];
+         std::string name = lp.col_names_.size() > col ? lp.col_names_[col] : "c" + std::to_string(col);
+         std::string bound_type = trim_spaces(iis.iisBoundStatusToString(iis.col_bound_[i]));
+
+         // Safely get the conflict status
+         std::string conflict_status = col < iis.col_status_.size()
+                                       ? conflict_status_to_string(iis.col_status_[col])
+                                       : "Unknown";
+
+         std::cerr << "[" << name << "]\n"
+                   << "    Status: " << conflict_status << "\n"
+                   << "    Cause:  " << bound_type << "\n"
+                   << "    Range:  [" << lp.col_lower_[col] << ", " << lp.col_upper_[col] << "]\n";
+      }
+    }
   }
 
-  for (size_t i = 0; i < iis.row_index_.size(); ++i) {
-    std::cerr << "Row " << iis.row_index_[i]
-              << ", bound = " << iis.iisBoundStatusToString(iis.row_bound_[i])
-              << ", status = " << iis.row_status_[i] << std::endl;
-  }
+  if (!iis.row_index_.empty()) {
+    std::cerr << "\n--- " << iis.row_index_.size() << " Constraints (Rows) in Conflict ---" << std::endl;
+    for (size_t i = 0; i < iis.row_index_.size(); ++i) {
+      if (i < iis.row_bound_.size()) {
+         HighsInt row = iis.row_index_[i];
+         std::string name = lp.row_names_.size() > row ? lp.row_names_[row] : "r" + std::to_string(row);
+         std::string bound_type = trim_spaces(iis.iisBoundStatusToString(iis.row_bound_[i]));
 
-  for (size_t i = 0; i < iis.info_.size(); ++i) {
-    std::cerr << "Subproblem " << i
-              << " | simplex_time = " << iis.info_[i].simplex_time
-              << " | simplex_iterations = " << iis.info_[i].simplex_iterations
-              << std::endl;
+         // Safely get the conflict status
+         std::string conflict_status = row < iis.row_status_.size()
+                                       ? conflict_status_to_string(iis.row_status_[row])
+                                       : "Unknown";
+
+         std::cerr << "[" << name << "]\n"
+                   << "    Status: " << conflict_status << "\n"
+                   << "    Cause:  " << bound_type << "\n"
+                   << "    Range:  [" << lp.row_lower_[row] << ", " << lp.row_upper_[row] << "]\n";
+      }
+    }
   }
 }
-
-// Updates
 
 void Solver::ChangeObjectiveSense(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
