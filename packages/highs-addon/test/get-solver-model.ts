@@ -50,24 +50,36 @@ function denseToCompressedSparseRow(
   };
 }
 
+function sanitize(value: number, epsilon: number): number {
+  return Math.abs(value) < epsilon ? 0 : value;
+}
+
 export function getSolverModel() {
+  const primalFeasibilityTolerance = 1e-7;
+
   const input = getInput();
   const variableLowerBounds: number[] = [];
   const variableUpperBounds: number[] = [];
-
-  const columnNames: string[] = [];
-  const rowNames: string[] = [];
+  const variableIdentifiers: string[] = [];
 
   input.variables.forEach((variable) => {
     variableLowerBounds.push(variable.lowerBound ?? Number.NEGATIVE_INFINITY);
     variableUpperBounds.push(variable.upperBound ?? Number.POSITIVE_INFINITY);
-
-    columnNames.push(`${variable.prefix}.${variable.type}`);
+    variableIdentifiers.push(`${variable.prefix}.${variable.type}`);
   });
+
+  if (new Set(variableIdentifiers).size !== variableIdentifiers.length) {
+    throw new Error(`Model has duplicate variables: ${variableIdentifiers}`);
+  }
 
   const objectiveVector = input.variables.map((v) => {
     let factorSum = 0;
     input.objective.forEach(({prefix, type, factor}) => {
+      if (!variableIdentifiers.includes(`${prefix}.${type}`)) {
+        throw new Error(
+          `Unsupported variable in objective (prefix: ${prefix}, type: ${type})`
+        );
+      }
       if (v.prefix !== prefix || v.type !== type) {
         return;
       }
@@ -79,6 +91,7 @@ export function getSolverModel() {
   const constraintMatrix: number[][] = [];
   const constraintLowerBounds: number[] = [];
   const constraintUpperBounds: number[] = [];
+  const constraintIdentifiers: string[] = [];
 
   input.constraints.forEach((constraint) => {
     constraintLowerBounds.push(
@@ -87,21 +100,32 @@ export function getSolverModel() {
     constraintUpperBounds.push(
       constraint.upperBound ?? Number.POSITIVE_INFINITY
     );
-    rowNames.push(constraint.identifier.replace(/\s+/g, '_'));
-
+    constraintIdentifiers.push(constraint.identifier.replace(/\s+/g, '_'));
     constraintMatrix.push(
       input.variables.map((v) => {
         let factorSum = 0;
         constraint.variables.forEach(({prefix, type, factor}) => {
+          if (!variableIdentifiers.includes(`${prefix}.${type}`)) {
+            throw new Error(
+              `Unsupported variable in constraint (prefix: ${prefix}, type: ${type},` +
+                ` constraint: ${constraint.identifier})`
+            );
+          }
           if (v.prefix !== prefix || v.type !== type) {
             return;
           }
           factorSum += factor ?? 0;
         });
-        return factorSum;
+        return sanitize(factorSum, primalFeasibilityTolerance);
       })
     );
   });
+
+  if (new Set(constraintIdentifiers).size !== constraintIdentifiers.length) {
+    throw new Error(
+      `Model has duplicate constraints: ${constraintIdentifiers}`
+    );
+  }
 
   const compressedSparseRowMatrix =
     denseToCompressedSparseRow(constraintMatrix);
@@ -118,7 +142,7 @@ export function getSolverModel() {
       indices: new Int32Array(compressedSparseRowMatrix.indices),
       values: new Float64Array(compressedSparseRowMatrix.values),
     },
-    columnNames,
-    rowNames,
+    columnNames: variableIdentifiers,
+    rowNames: constraintIdentifiers,
   };
 }
