@@ -1,7 +1,7 @@
 packages:
   - packages/**
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true
 overrides:
   axios: ">=1.8.2"
   esbuild: ">=0.25.0"
