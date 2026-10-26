@@ -34,6 +34,7 @@
     "pkg-prebuilds": "^1.0.0"
   },
   "optionalDependencies": {
+    "cmake-js": "^7.3.0",
     "node-addon-api": "^8.3.0"
   },
   "devDependencies": {
