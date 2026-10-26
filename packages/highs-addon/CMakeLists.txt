@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.22)
 
 cmake_policy(SET CMP0091 NEW)
 cmake_policy(SET CMP0042 NEW)
@@ -7,8 +7,10 @@ project(highs_addon)
 
 add_definitions(-DNAPI_VERSION=8)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+
 
 # Download HiGHS
 include(ExternalProject)
@@ -22,6 +24,7 @@ ExternalProject_Add(highs_download
     -DFAST_BUILD=OFF
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+    -DZLIB=OFF
   BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libhighs
   INSTALL_COMMAND ""
   BUILD_BYPRODUCTS <BINARY_DIR>/lib/libhighs.a
