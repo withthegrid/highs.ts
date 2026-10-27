@@ -82,6 +82,8 @@ jobs:
           cache: pnpm
       - name: Install
         run: pnpm i
+      - name: Debug build directory
+        run: ls packages/highs-addon/build/Release
       - name: Generate addon prebuild
         run: |
           pnpm -F highs-addon exec pkg-prebuilds-copy `
