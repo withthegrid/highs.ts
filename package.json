@@ -48,7 +48,8 @@
   "prettier": "@mtth/prettier-typescript",
   "pnpm": {
     "patchedDependencies": {
-      "inlinable@0.7.1": "patches/inlinable@0.7.1.patch"
+      "inlinable@0.7.1": "patches/inlinable@0.7.1.patch",
+      "inlinable-runtime@0.7.1": "patches/inlinable-runtime@0.7.1.patch"
     }
   }
 }

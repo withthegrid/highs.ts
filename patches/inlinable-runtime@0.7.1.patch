@@ -1,0 +1,21 @@
+diff --git a/lib/context.js b/lib/context.js
+index 2221a6314a3ed609d4e8163a386ca14883411f2a..e04f658c27c0228ed87607c4448d4c2a76241ab8 100644
+--- a/lib/context.js
++++ b/lib/context.js
+@@ -6,7 +6,7 @@
+ export function enclosingRoot(args) {
+     const sep = args.separator;
+     const sentinels = args.rootFolders ?? defaultRootFolders;
+-    const pat = new RegExp(`${sep}(${sentinels.join('|')})(${sep}|$)`, 'g');
++    const pat = new RegExp(`[\\\/](${sentinels.join('|')})([\\\/]|$)`, 'g');
+     const matches = [...args.path.matchAll(pat)];
+     return matches.length
+         ? args.path.slice(0, matches[matches.length - 1]?.index)
+@@ -16,6 +16,6 @@ export const defaultRootFolders = [
+     'src',
+     'lib',
+     'test',
+-    '.next',
++    '\\.next',
+ ];
+ export const defaultResourceFolder = 'resources';
