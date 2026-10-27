@@ -1,0 +1,21 @@
+diff --git a/lib/inline/state.js b/lib/inline/state.js
+index 3e05de4166eaae180296145803a9d4cb85be8418..ebecd4cf25c2da1e6c0f0e3d681cd89674abb60a 100644
+--- a/lib/inline/state.js
++++ b/lib/inline/state.js
+@@ -2,6 +2,7 @@ import { assert, errorFactories } from '@mtth/stl-errors';
+ import ast from 'ast-types';
+ import { isInlineTransformName, } from 'inlinable-runtime';
+ import { inlining } from 'inlinable-runtime/sentinel';
++import { pathToFileURL } from 'url';
+ import path from 'path';
+ import { ERROR_PREFIX } from '../common.js';
+ import { newContext } from '../context.js';
+@@ -111,7 +112,7 @@ export async function collectInlinedValues(target, packageName) {
+     const state = new Array(valueCount);
+     states.set(lp, state);
+     try {
+-        await inlining(lp, () => import(lp));
++        await inlining(lp, () => import(pathToFileURL(lp).href));
+     }
+     finally {
+         states.delete(lp);

@@ -45,5 +45,10 @@
       "eslint --fix"
     ]
   },
-  "prettier": "@mtth/prettier-typescript"
+  "prettier": "@mtth/prettier-typescript",
+  "pnpm": {
+    "patchedDependencies": {
+      "inlinable@0.7.1": "patches/inlinable@0.7.1.patch"
+    }
+  }
 }

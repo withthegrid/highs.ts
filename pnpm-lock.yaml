@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  inlinable@0.7.1:
+    hash: an45u6jrsbkf6xbm2zlrovhpom
+    path: patches/inlinable@0.7.1.patch
+
 importers:
 
   .:
@@ -113,7 +118,7 @@ importers:
         version: 2.2.3
       inlinable:
         specifier: ^0.7.0
-        version: 0.7.1
+        version: 0.7.1(patch_hash=an45u6jrsbkf6xbm2zlrovhpom)
 
 packages:
 
@@ -2894,7 +2899,7 @@ snapshots:
     dependencies:
       fflate: 0.8.3
 
-  inlinable@0.7.1:
+  inlinable@0.7.1(patch_hash=an45u6jrsbkf6xbm2zlrovhpom):
     dependencies:
       '@mtth/stl-errors': 0.7.1
       '@mtth/stl-utils': 0.7.1
