@@ -27,7 +27,7 @@ ExternalProject_Add(highs_download
     -DZLIB=OFF
   BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libhighs
   INSTALL_COMMAND ""
-  BUILD_BYPRODUCTS "${HIGHS_BYPRODUCT_PATH}"
+  BUILD_BYPRODUCTS <BINARY_DIR>/lib/libhighs.a
 )
 ExternalProject_Get_Property(highs_download source_dir)
 ExternalProject_Get_Property(highs_download binary_dir)
