@@ -84,11 +84,11 @@ jobs:
         run: pnpm i
       - name: Generate addon prebuild
         run: |
-          pnpm -F highs-addon exec pkg-prebuilds-copy \
-            --baseDir=build/Release \
-            --source=$BINDING_NAME.node \
-            --napi_version=$NAPI_VERSION \
-            --name=$BINDING_NAME \
+          pnpm -F highs-addon exec pkg-prebuilds-copy `
+            --baseDir=build/Release `
+            --source=$env:BINDING_NAME.node `
+            --napi_version=$env:NAPI_VERSION `
+            --name=$env:BINDING_NAME `
             --strip
       - name: Upload prebuild
         uses: actions/upload-artifact@v4
