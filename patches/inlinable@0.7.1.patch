@@ -1,3 +1,22 @@
+diff --git a/lib/context.js b/lib/context.js
+index cbc6142cc8cbfe6282d70994fabfc58bb9d52896..e7fe29dfcad0b487d274df7ca71bdae2af32cfaa 100644
+--- a/lib/context.js
++++ b/lib/context.js
+@@ -41,6 +41,14 @@ function enclosing(fp, opts) {
+ }
+ class RealEnclosingPackage {
+     constructor(root, resourceFolder) {
++        let current = root;
++        while (current && current !== path.parse(current).root) {
++            if (fs.existsSync(path.join(current, 'package.json'))) {
++                this.root = current;
++                return;
++            }
++            current = path.dirname(current);
++        }
+         this.root = root;
+         this.resourceFolder = resourceFolder;
+     }
 diff --git a/lib/inline/state.js b/lib/inline/state.js
 index 3e05de4166eaae180296145803a9d4cb85be8418..ebecd4cf25c2da1e6c0f0e3d681cd89674abb60a 100644
 --- a/lib/inline/state.js

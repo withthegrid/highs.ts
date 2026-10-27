@@ -9,7 +9,7 @@ patchedDependencies:
     hash: rvuh5hlqboeaeo4dpptjadfrce
     path: patches/inlinable-runtime@0.7.1.patch
   inlinable@0.7.1:
-    hash: an45u6jrsbkf6xbm2zlrovhpom
+    hash: motswp3xiqxy4h6aig42xafwme
     path: patches/inlinable@0.7.1.patch
 
 importers:
@@ -121,7 +121,7 @@ importers:
         version: 2.2.3
       inlinable:
         specifier: ^0.7.0
-        version: 0.7.1(patch_hash=an45u6jrsbkf6xbm2zlrovhpom)
+        version: 0.7.1(patch_hash=motswp3xiqxy4h6aig42xafwme)
 
 packages:
 
@@ -2902,7 +2902,7 @@ snapshots:
     dependencies:
       fflate: 0.8.3
 
-  inlinable@0.7.1(patch_hash=an45u6jrsbkf6xbm2zlrovhpom):
+  inlinable@0.7.1(patch_hash=motswp3xiqxy4h6aig42xafwme):
     dependencies:
       '@mtth/stl-errors': 0.7.1
       '@mtth/stl-utils': 0.7.1
