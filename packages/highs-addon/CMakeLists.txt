@@ -10,7 +10,7 @@ add_definitions(-DNAPI_VERSION=8)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
+set(HIGHS_LIB_FILENAME "${CMAKE_STATIC_LIBRARY_PREFIX}highs${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
 # Download HiGHS
 include(ExternalProject)
@@ -27,10 +27,12 @@ ExternalProject_Add(highs_download
     -DZLIB=OFF
   BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libhighs
   INSTALL_COMMAND ""
-  BUILD_BYPRODUCTS <BINARY_DIR>/lib/libhighs.a
+  BUILD_BYPRODUCTS "${HIGHS_BYPRODUCT_PATH}"
 )
 ExternalProject_Get_Property(highs_download source_dir)
 ExternalProject_Get_Property(highs_download binary_dir)
+
+set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/${HIGHS_LIB_FILENAME}")
 
 # Build binding
 include_directories(${CMAKE_JS_INC} ${source_dir}/src ${binary_dir})
@@ -38,4 +40,4 @@ file(GLOB SOURCE_FILES "src/*.cc")
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 add_dependencies(${PROJECT_NAME} highs_download)
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${binary_dir}/lib/libhighs.a)
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${HIGHS_BYPRODUCT_PATH})
