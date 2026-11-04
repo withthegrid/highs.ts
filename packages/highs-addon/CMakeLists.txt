@@ -22,11 +22,11 @@ if(MSVC)
         -DCMAKE_CXX_FLAGS=/MD
     )
 
-  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/Release/${HIGHS_LIB_FILENAME}")
-  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/Release/${HIGHS_LIB_FILENAME}")
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/Release/highs.lib")
+  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/Release/highs.lib")
 else()
-  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/${HIGHS_LIB_FILENAME}")
-  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/${HIGHS_LIB_FILENAME}")
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/libhighs.a")
+  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/libhighs.a")
 endif()
 
 add_definitions(-DNAPI_VERSION=8)
