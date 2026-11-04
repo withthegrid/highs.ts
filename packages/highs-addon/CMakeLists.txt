@@ -49,6 +49,11 @@ ExternalProject_Add(highs_download
 ExternalProject_Get_Property(highs_download source_dir)
 ExternalProject_Get_Property(highs_download binary_dir)
 
+if(MSVC AND CMAKE_JS_NODELIB_DEF AND CMAKE_JS_NODELIB_TARGET)
+  # Generate node.lib
+  execute_process(COMMAND ${CMAKE_AR} /def:${CMAKE_JS_NODELIB_DEF} /out:${CMAKE_JS_NODELIB_TARGET} ${CMAKE_STATIC_LINKER_FLAGS})
+endif()
+
 set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/${HIGHS_LIB_FILENAME}")
 
 # Build binding
