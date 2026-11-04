@@ -19,6 +19,12 @@ if(MSVC)
         -DCMAKE_C_FLAGS=/MD
         -DCMAKE_CXX_FLAGS=/MD
     )
+
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/Release/${HIGHS_LIB_FILENAME}")
+  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/Release/${HIGHS_LIB_FILENAME}")
+else()
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/${HIGHS_LIB_FILENAME}")
+  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/${HIGHS_LIB_FILENAME}")
 endif()
 
 add_definitions(-DNAPI_VERSION=8)
@@ -42,9 +48,9 @@ ExternalProject_Add(highs_download
     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
     -DZLIB=OFF
     ${HIGHS_MSVC_ARGS}
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libhighs
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release --target libhighs
   INSTALL_COMMAND ""
-  BUILD_BYPRODUCTS <BINARY_DIR>/lib/libhighs.a
+  BUILD_BYPRODUCTS ${HIGHS_STATIC_LIB}
 )
 ExternalProject_Get_Property(highs_download source_dir)
 ExternalProject_Get_Property(highs_download binary_dir)
@@ -53,8 +59,6 @@ if(MSVC AND CMAKE_JS_NODELIB_DEF AND CMAKE_JS_NODELIB_TARGET)
   # Generate node.lib
   execute_process(COMMAND ${CMAKE_AR} /def:${CMAKE_JS_NODELIB_DEF} /out:${CMAKE_JS_NODELIB_TARGET} ${CMAKE_STATIC_LINKER_FLAGS})
 endif()
-
-set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/${HIGHS_LIB_FILENAME}")
 
 # Build binding
 include_directories(${CMAKE_JS_INC} ${source_dir}/src ${binary_dir})
