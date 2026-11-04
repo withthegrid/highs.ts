@@ -5,6 +5,11 @@ cmake_policy(SET CMP0042 NEW)
 
 project(highs_addon)
 
+add_definitions(-DNAPI_VERSION=8)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(HIGHS_LIB_FILENAME "${CMAKE_STATIC_LIBRARY_PREFIX}highs${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
 set(HIGHS_MSVC_ARGS "")
@@ -22,17 +27,11 @@ if(MSVC)
         -DCMAKE_CXX_FLAGS=/MD
     )
 
-  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/Release/highs.lib")
   set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/Release/highs.lib")
 else()
-  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/libhighs.a")
   set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/libhighs.a")
 endif()
 
-add_definitions(-DNAPI_VERSION=8)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Download HiGHS
 include(ExternalProject)
@@ -54,6 +53,12 @@ ExternalProject_Add(highs_download
 )
 ExternalProject_Get_Property(highs_download source_dir)
 ExternalProject_Get_Property(highs_download binary_dir)
+
+if(MSVC)
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/Release/highs.lib")
+else()
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/libhighs.a")
+endif()
 
 if(MSVC AND CMAKE_JS_NODELIB_DEF AND CMAKE_JS_NODELIB_TARGET)
   # Generate node.lib
