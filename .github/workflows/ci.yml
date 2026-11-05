@@ -56,14 +56,12 @@ jobs:
     strategy:
       matrix:
         include:
-          # - key: linux-x64
-          #   os: ubuntu-24.04
-          # - key: darwin-x64
-          #   os: macos-12
-          # - key: darwin-arm64
-          #   os: macos-14
-          - key: windows-x64
-            os: windows-latest
+          - key: linux-x64
+            os: ubuntu-24.04
+          - key: darwin-x64
+            os: macos-12
+          - key: darwin-arm64
+            os: macos-14
     name: Prebuild ${{ matrix.key }}
     timeout-minutes: 25
     runs-on: ${{ matrix.os }}
@@ -82,8 +80,39 @@ jobs:
           cache: pnpm
       - name: Install
         run: pnpm i
-      - name: Debug build directory
-        run: ls packages/highs-addon/build
+      - name: Generate addon prebuild
+        run: |
+          pnpm -F highs-addon exec pkg-prebuilds-copy \
+            --baseDir=build/Release \
+            --source=$BINDING_NAME.node \
+            --napi_version=$NAPI_VERSION \
+            --name=$BINDING_NAME \
+            --strip
+      - name: Upload prebuild
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.key }}-prebuilds
+          path: packages/highs-addon/prebuilds
+          retention-days: 1
+  prebuild-windows:
+    name: Prebuild windows-x64
+    timeout-minutes: 25
+    runs-on: windows-latest
+    needs: test
+    # if: needs.test.outputs.new-version != ''
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+      - name: Install
+        run: pnpm i
       - name: Generate addon prebuild
         run: |
           pnpm -F highs-addon exec pkg-prebuilds-copy `
@@ -95,7 +124,7 @@ jobs:
       - name: Upload prebuild
         uses: actions/upload-artifact@v4
         with:
-          name: native-${{ matrix.key }}-prebuilds
+          name: native-windows-x64-prebuilds
           path: packages/highs-addon/prebuilds
           retention-days: 1
   prebuild-docker:
