@@ -10,6 +10,26 @@ add_definitions(-DNAPI_VERSION=8)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(HIGHS_MSVC_ARGS "")
+if(MSVC)
+  set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+  string(REPLACE "/MT" "/MD" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REPLACE "/MT" "/MD" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  string(REPLACE "/MT" "/MD" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+  string(REPLACE "/MT" "/MD" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+
+  list(APPEND HIGHS_MSVC_ARGS
+        -DCMAKE_C_FLAGS_RELEASE=/MD
+        -DCMAKE_CXX_FLAGS_RELEASE=/MD
+        -DCMAKE_C_FLAGS=/MD
+        -DCMAKE_CXX_FLAGS=/MD
+    )
+
+  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/Release/highs.lib")
+else()
+  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/libhighs.a")
+endif()
+
 # Download HiGHS
 include(ExternalProject)
 ExternalProject_Add(highs_download
@@ -22,12 +42,24 @@ ExternalProject_Add(highs_download
     -DFAST_BUILD=OFF
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libhighs
+    ${HIGHS_MSVC_ARGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release --target libhighs
   INSTALL_COMMAND ""
-  BUILD_BYPRODUCTS <BINARY_DIR>/lib/libhighs.a
+  BUILD_BYPRODUCTS ${HIGHS_STATIC_LIB}
 )
 ExternalProject_Get_Property(highs_download source_dir)
 ExternalProject_Get_Property(highs_download binary_dir)
+
+if(MSVC)
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/Release/highs.lib")
+else()
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/libhighs.a")
+endif()
+
+if(MSVC AND CMAKE_JS_NODELIB_DEF AND CMAKE_JS_NODELIB_TARGET)
+  # Generate node.lib
+  execute_process(COMMAND ${CMAKE_AR} /def:${CMAKE_JS_NODELIB_DEF} /out:${CMAKE_JS_NODELIB_TARGET} ${CMAKE_STATIC_LINKER_FLAGS})
+endif()
 
 # Build binding
 include_directories(${CMAKE_JS_INC} ${source_dir}/highs ${binary_dir})
@@ -35,4 +67,4 @@ file(GLOB SOURCE_FILES "src/*.cc")
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 add_dependencies(${PROJECT_NAME} highs_download)
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${binary_dir}/lib/libhighs.a)
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${HIGHS_BYPRODUCT_PATH})
