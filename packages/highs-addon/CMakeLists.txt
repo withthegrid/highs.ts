@@ -43,7 +43,7 @@ ExternalProject_Add(highs_download
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
     ${HIGHS_MSVC_ARGS}
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release --target libhighs
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libhighs
   INSTALL_COMMAND ""
   BUILD_BYPRODUCTS ${HIGHS_STATIC_LIB}
 )
