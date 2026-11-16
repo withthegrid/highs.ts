@@ -26,8 +26,10 @@ if(MSVC)
     )
 
   set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/Release/highs.lib")
+  set(CMAKE_COMMAND_FLAGS "--build . --config Release --target libhighs")
 else()
   set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/libhighs.a")
+  set(CMAKE_COMMAND_FLAGS "--build . --target libhighs")
 endif()
 
 # Download HiGHS
@@ -43,7 +45,7 @@ ExternalProject_Add(highs_download
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
     ${HIGHS_MSVC_ARGS}
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libhighs
+  BUILD_COMMAND ${CMAKE_COMMAND} ${CMAKE_COMMAND_FLAGS}
   INSTALL_COMMAND ""
   BUILD_BYPRODUCTS ${HIGHS_STATIC_LIB}
 )
