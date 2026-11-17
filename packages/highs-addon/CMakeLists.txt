@@ -29,7 +29,7 @@ if(MSVC)
   set(CMAKE_COMMAND_FLAGS --build . --config Release --target libhighs)
 else()
   set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/libhighs.a")
-  set(CMAKE_COMMAND_FLAGS --build . --target libhighs")
+  set(CMAKE_COMMAND_FLAGS --build . --target libhighs)
 endif()
 
 # Download HiGHS
