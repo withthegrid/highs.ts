@@ -25,7 +25,7 @@ if(MSVC)
         -DCMAKE_CXX_FLAGS=/MD
     )
 
-  set(HIGHS_STATIC_LIB "<BINARY_DIR>/Release/bin/highs.lib")
+  set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/Release/highs.lib")
   set(CMAKE_COMMAND_FLAGS --build . --config Release --target libhighs)
 else()
   set(HIGHS_STATIC_LIB "<BINARY_DIR>/lib/libhighs.a")
@@ -53,7 +53,7 @@ ExternalProject_Get_Property(highs_download source_dir)
 ExternalProject_Get_Property(highs_download binary_dir)
 
 if(MSVC)
-  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/Release/bin/highs.lib")
+  set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/Release/highs.lib")
 else()
   set(HIGHS_BYPRODUCT_PATH "${binary_dir}/lib/libhighs.a")
 endif()
