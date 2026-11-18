@@ -32,6 +32,10 @@
     },
     "ignoredBuiltDependencies": [
       "esbuild"
-    ]
+    ],
+    "patchedDependencies": {
+      "inlinable": "patches/inlinable.patch",
+      "inlinable-runtime": "patches/inlinable-runtime.patch"
+    }
   }
 }

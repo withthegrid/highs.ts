@@ -54,6 +54,8 @@ jobs:
           #   os: macos-12
           - key: darwin-arm64
             os: macos-14
+          - key: windows-x64
+            os: windows-2022
     name: Prebuild ${{ matrix.key }}
     timeout-minutes: 25
     runs-on: ${{ matrix.os }}
@@ -74,6 +76,7 @@ jobs:
             --napi_version=$NAPI_VERSION \
             --name=$BINDING_NAME \
             --strip
+        shell: bash
       - name: Upload prebuild
         uses: actions/upload-artifact@v4
         with:
